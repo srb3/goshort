@@ -77,7 +77,7 @@ docs:
 # Docker Build
 docker-build: build
 	@echo "Building Docker image $(DOCKER_IMAGE):$(TAG)..."
-	docker build --build-arg VERSION=$(VERSION) --build-arg BUILD_DATE=$(BUILD_DATE) --build-arg BINARY_NAME=$(BINARY_NAME) -t $(DOCKER_IMAGE):$(TAG) .
+	docker build --build-arg VERSION=$(VERSION) --build-arg BUILD_DATE=$(BUILD_DATE) -t $(DOCKER_IMAGE):$(TAG) .
 
 # Docker Run
 docker-run:

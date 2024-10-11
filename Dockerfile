@@ -13,9 +13,9 @@ ENV GO111MODULE=on     CGO_ENABLED=0     GOOS=linux     GOARCH=amd64
 # Create app directory
 WORKDIR /app
 
-# Copy go.mod and go.sum files
-COPY go.mod go.sum ./
-
+# Copy go.mod and conditionally copy go.sum if it exists
+COPY go.mod ./
+RUN if [ -f go.sum ]; then cp go.sum .; fi
 # Download dependencies
 RUN go mod download
 
@@ -23,7 +23,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app with embedded version and build date
-RUN go build -ldflags "-s -w -X main.version=${VERSION} -X main.buildDate=${BUILD_DATE}" -o ${BINARY_NAME} .
+RUN go build -ldflags "-s -w -X main.version=${VERSION} -X main.buildDate=${BUILD_DATE}" -o run ./cmd/main.go
 
 # Use a minimal image for the final build
 FROM alpine:latest
@@ -38,7 +38,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 
 # Copy the binary from the builder
-COPY --from=builder /app/${BINARY_NAME} .
+COPY --from=builder "/app/run" .
 
 # Grant permissions
 RUN chown -R appuser:appgroup /app
@@ -50,4 +50,4 @@ USER appuser
 EXPOSE ${PORT}
 
 # Command to run
-CMD ["./${BINARY_NAME}"]
+CMD ["./run"]
